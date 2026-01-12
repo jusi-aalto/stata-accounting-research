@@ -22,6 +22,35 @@ Alternatively, clone this repository to ~/.claude/skills
 | Code adapted to your variable names | Methodological trade-off analysis |
 | Source citations for patterns | Data or sample construction |
 
+## Example
+
+**Query:**
+> How do I implement entropy balancing? My treatment variable is 'cyber_breach' and I want to balance on 'size', 'roa', and 'leverage'
+
+**Response:**
+
+```stata
+* Step 1: Generate entropy balancing weights
+ebalance cyber_breach size roa leverage, target(1) generate(ebw)
+
+* Step 2: Use weights in regression
+reghdfe depvar cyber_breach controls [aw=ebw], absorb(firm year) cluster(firm)
+```
+
+| Option | Meaning |
+|--------|---------|
+| `target(1)` | Balance means only (most common) |
+| `target(2)` | Balance means + variances |
+| `target(3)` | Balance means + variances + skewness |
+
+**Alternative from Nessa et al. (2025), JAR 63(2)** — balance by year when treatment timing varies:
+
+```stata
+forvalues y = 2015/2022 {
+    qui ebalance cyber_breach size roa leverage if year==`y', generate(ew`y') tar(1)
+}
+```
+
 ## Contents
 
 This skill includes only STATA .do files. Other file types (SAS, R, Python, data files) from the original replication packages are not included.
